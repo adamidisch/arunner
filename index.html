@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Examorio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#020617">
+</head>
+<body>
+
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <h2>Examorio</h2>
+      <p class="login-subtitle">Γράψε τα στοιχεία σου για να κρατήσουμε τις απαντήσεις σου</p>
+
+      <label class="login-label">Όνομα μαθητή
+        <input id="studentName" class="login-input" type="text" autocomplete="name">
+      </label>
+
+      <label class="login-label">Κωδικός μαθητή
+        <input id="studentCode" class="login-input" type="text">
+      </label>
+
+      <label class="login-label">Τηλέφωνο
+        <input id="studentPhone" class="login-input" type="tel" autocomplete="tel">
+      </label>
+
+      <button id="loginButton" class="login-button" type="button">Είμαι έτοιμος</button>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="frame-inner">
+      <div class="topbar">
+        <div id="questionNumber" class="pill pill-left">1/1</div>
+        <div class="pill pill-right"><span class="pill-label">ΧΡΟΝΟΣ</span><span id="timerDisplay" class="pill-time">90:00</span></div>
+      </div>
+
+      <div id="loading" class="loading-overlay hidden" aria-live="polite" aria-busy="true">
+  <div class="loading-box">
+    <div class="loading-title">Loading ...</div>
+    <div class="loading-bar"><div id="loadBar" class="loading-bar-inner"></div></div>
+  </div>
+</div>
+
+      <div id="questionCard" class="card hidden" aria-live="polite">
+        <div class="question-title" id="questionText"></div>
+
+        <div class="media-wrap">
+          <img id="progressGraph" class="media" src="" alt="graph">
+        </div>
+
+        <div id="extractHolder" class="extract-holder"></div>
+
+        <div id="answers" class="answers-grid"></div>
+
+        <div id="feedback" class="feedback"></div>
+      </div>
+
+      <div class="bottombar">
+        <button id="prevQuestion" class="btn btn-ghost" type="button">&lt; Προηγούμενη</button>
+        <div class="bottombar-right">
+          <button id="nextQuestion" class="btn btn-ghost" type="button">Επόμενη &gt;</button>
+          <button id="finishButton" class="btn btn-solid" type="button">Τελείωσα</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="graphModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close graph-close" aria-label="Close graph">&times;</button>
+        <img id="graphModalImg" src="" alt="Graph large" class="modal-image">
+      </div>
+    </div>
+
+    <div id="extractModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close extract-close" aria-label="Close extract">&times;</button>
+        <img id="extractModalImg" src="" alt="Exam extract" class="modal-image">
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    }
+  </script>
+
+</body>
+</html>

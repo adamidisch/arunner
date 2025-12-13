@@ -152,12 +152,22 @@ function stopTimer(){
   timerId = null;
 }
 
-function showMessageBanner() {
+let messageHideTimeout = null;
+
+function showMessageBanner(message = 'Proceed to exam test', duration = 2000) {
   if (!messageBanner) return;
+
+  messageBanner.textContent = message;
   messageBanner.classList.add('visible');
-  setTimeout(() => {
+
+  if (messageHideTimeout) {
+    clearTimeout(messageHideTimeout);
+  }
+
+  messageHideTimeout = setTimeout(() => {
     messageBanner.classList.remove('visible');
-  }, 2000);
+    messageHideTimeout = null;
+  }, duration);
 }
 
 window.addEventListener('DOMContentLoaded', () => {

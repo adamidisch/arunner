@@ -7,8 +7,30 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#020617">
+  <style>
+    .message-banner {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #22c55e;
+      color: #052e16;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 50;
+    }
+
+    .message-banner.visible {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
+
+  <div id="messageBanner" class="message-banner" aria-live="polite">Proceed to exam test</div>
 
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card">

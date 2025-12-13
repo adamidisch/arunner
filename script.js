@@ -24,6 +24,7 @@ const questionTextEl = document.getElementById('questionText');
 const extractHolderEl = document.getElementById('extractHolder');
 const answersEl = document.getElementById('answers');
 const feedbackEl = document.getElementById('feedback');
+const messageBanner = document.getElementById('messageBanner');
 
 const prevBtn = document.getElementById('prevQuestion');
 const timerEl = document.getElementById('timerDisplay');
@@ -151,11 +152,21 @@ function stopTimer(){
   timerId = null;
 }
 
+function showMessageBanner() {
+  if (!messageBanner) return;
+  messageBanner.classList.add('visible');
+  setTimeout(() => {
+    messageBanner.classList.remove('visible');
+  }, 2000);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   const saved = loadStudentFromStorage();
   if (saved) {
     finishLogin(saved);
   }
+
+  showMessageBanner();
 });
 
 // nav helpers

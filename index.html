@@ -35,21 +35,21 @@
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
       <h2>Examorio</h2>
-      <p class="login-subtitle">Γράψε τα στοιχεία σου για να κρατήσουμε τις απαντήσεις σου</p>
+      <p class="login-subtitle">Login:</p>
 
-      <label class="login-label">Όνομα μαθητή:
+      <label class="login-label">Student name:
         <input id="studentName" class="login-input" type="text" autocomplete="name">
       </label>
 
-      <label class="login-label">Κωδικός μαθητή:
+      <label class="login-label">Student ID:
         <input id="studentCode" class="login-input" type="text">
       </label>
 
-      <label class="login-label">Τηλέφωνο:
+      <label class="login-label">Phone:
         <input id="studentPhone" class="login-input" type="tel" autocomplete="tel">
       </label>
 
-      <button id="loginButton" class="login-button" type="button">Είμαι έτοιμος</button>
+      <button id="loginButton" class="login-button" type="button">Start</button>
     </div>
   </div>
 
@@ -57,7 +57,7 @@
     <div class="frame-inner">
       <div class="topbar">
         <div id="questionNumber" class="pill pill-left">1/1</div>
-        <div class="pill pill-right"><span class="pill-label">ΧΡΟΝΟΣ</span><span id="timerDisplay" class="pill-time">90:00</span></div>
+        <div class="pill pill-right"><span class="pill-label">TIME</span><span id="timerDisplay" class="pill-time">90:00</span></div>
       </div>
 
       <div id="loading" class="loading-overlay hidden" aria-live="polite" aria-busy="true">
@@ -82,10 +82,10 @@
       </div>
 
       <div class="bottombar">
-        <button id="prevQuestion" class="btn btn-ghost" type="button">&lt; Προηγούμενη</button>
+        <button id="prevQuestion" class="btn btn-ghost" type="button">&lt; Previous</button>
         <div class="bottombar-right">
-          <button id="nextQuestion" class="btn btn-ghost" type="button">Επόμενη &gt;</button>
-          <button id="finishButton" class="btn btn-solid" type="button">Τελείωσα</button>
+          <button id="nextQuestion" class="btn btn-ghost" type="button">Next &gt;</button>
+          <button id="finishButton" class="btn btn-solid" type="button">Finish</button>
         </div>
       </div>
     </div>

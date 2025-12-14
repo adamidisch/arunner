@@ -1,7 +1,7 @@
 // Examorio quiz engine
 
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   // endpoint για ερωτήσεις
-const ANSWERS_URL = 'https://script.google.com/macros/s/AKfycbx2cZydB4HWruvp9gW4Nu5tCgipjDcSbCJ5sgxpeLJulLcKxicuwb--xDd8pVGtEw5Q3A/exec'; // endpoint για αποθήκευση απαντήσεων
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   // endpoint for questions
+const ANSWERS_URL = 'https://script.google.com/macros/s/AKfycbx2cZydB4HWruvp9gW4Nu5tCgipjDcSbCJ5sgxpeLJulLcKxicuwb--xDd8pVGtEw5Q3A/exec'; // endpoint for saving answers
 
 const EXTRACTS = {
   A: 'images/extractA.png',
@@ -168,7 +168,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const phone = (studentPhoneInput?.value || '').trim();
 
       if (!name || !code) {
-        alert('Γράψε όνομα και κωδικό');
+        alert('Enter name and code');
         return;
       }
 
@@ -343,7 +343,7 @@ function renderTextQuestion(q) {
 
   textarea.className = 'text-answer';
   textarea.rows = 5;
-  textarea.placeholder = 'Γράψε την απάντηση σου εδώ';
+  textarea.placeholder = 'Type your answer here';
 
   const controls = document.createElement('div');
   controls.style.display = 'flex';
@@ -354,7 +354,7 @@ function renderTextQuestion(q) {
 
   const saveButton = document.createElement('button');
   saveButton.type = 'button';
-  saveButton.textContent = 'Αποθήκευση απάντησης';
+  saveButton.textContent = 'Save answer';
   saveButton.className = 'nav-button';
 
   const modelButton = document.createElement('button');
@@ -380,7 +380,7 @@ function renderTextQuestion(q) {
   saveButton.addEventListener('click', () => {
     const text = textarea.value.trim();
     if (!text) {
-      alert('Γράψε κάτι πρώτα');
+      alert('Add an answer first');
       return;
     }
     hasAnsweredCurrent = true;
@@ -392,7 +392,7 @@ function renderTextQuestion(q) {
       timestamp: new Date().toISOString()
     });
 
-    feedbackEl.textContent = 'Η απάντηση σου αποθηκεύτηκε';
+    feedbackEl.textContent = 'Your answer has been saved';
 
     const payload = {
       type: 'text',
@@ -408,7 +408,7 @@ function renderTextQuestion(q) {
   });
 
   modelButton.addEventListener('click', () => {
-    feedbackEl.textContent = q.explanation || 'Δεν υπάρχει καταχωρημένη ενδεικτική απάντηση';
+    feedbackEl.textContent = q.explanation || 'No sample answer available';
   });
 }
 
@@ -539,8 +539,8 @@ async function loadQuestions() {
       const box = loadingEl.querySelector('.loading-box');
       if(box){
         box.innerHTML = `<div class="loading-title">Loading ...</div>
-        <div style="color:#eaf2ff; margin-top:10px; font-size:14px;">Πρόβλημα στο loading</div>
-        <button id="retryLoad" class="btn" style="margin-top:12px; width:100%;">Ξαναδοκίμασε</button>`;
+        <div style="color:#eaf2ff; margin-top:10px; font-size:14px;">Problem loading</div>
+        <button id="retryLoad" class="btn" style="margin-top:12px; width:100%;">Try again</button>`;
         const retry = box.querySelector('#retryLoad');
         retry.addEventListener('click', ()=>{
           // restore box structure

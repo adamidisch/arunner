@@ -111,23 +111,13 @@ function saveStudentToStorage(student) {
 function finishLogin(student) {
   currentStudent = student;
   saveStudentToStorage(student);
-  loginOverlay.classList.add('hidden');
+  if (loginOverlay) {
+    loginOverlay.classList.add('hidden');
+    loginOverlay.setAttribute('aria-hidden', 'true');
+    loginOverlay.style.pointerEvents = 'none';
+  }
   loadQuestions();
 }
-
-loginButton.addEventListener('click', () => {
-  const name = studentNameInput.value.trim();
-  const code = studentCodeInput.value.trim();
-  const phone = studentPhoneInput.value.trim();
-
-  if (!name || !code) {
-    alert('Γράψε όνομα και κωδικό');
-    return;
-  }
-
-  const student = { name, code, phone };
-  finishLogin(student);
-});
 
 function formatTime(total){
   const m = Math.floor(total/60);
@@ -171,6 +161,22 @@ function showMessageBanner(message = 'Proceed to exam test', duration = 2000) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  if (loginButton) {
+    loginButton.addEventListener('click', () => {
+      const name = (studentNameInput?.value || '').trim();
+      const code = (studentCodeInput?.value || '').trim();
+      const phone = (studentPhoneInput?.value || '').trim();
+
+      if (!name || !code) {
+        alert('Γράψε όνομα και κωδικό');
+        return;
+      }
+
+      const student = { name, code, phone };
+      finishLogin(student);
+    });
+  }
+
   const saved = loadStudentFromStorage();
   if (saved) {
     finishLogin(saved);

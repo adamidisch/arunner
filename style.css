@@ -142,11 +142,22 @@ body{
 }
 
 /* Smooth finish transition */
-.frame-inner.fade-out{
+\.frame-inner.fade-out{
   opacity:0;
   transform: translateY(6px);
-  transition: opacity 320ms ease, transform 320ms ease;
+  transition: opacity 640ms ease, transform 640ms ease;
 }
+
+/* Finish completion animation */
+.frame-inner.finish-anim{
+  animation: finishPop 640ms ease forwards;
+}
+@keyframes finishPop{
+  0%{opacity:1; transform: translateY(0) scale(1); filter: brightness(1);}
+  40%{opacity:1; transform: translateY(-2px) scale(1.01); filter: brightness(1.08);}
+  100%{opacity:0; transform: translateY(6px) scale(0.985); filter: brightness(1.02);}
+}
+
 
 .card{
   border:1px solid rgba(96,165,250,0.65);
@@ -226,6 +237,9 @@ body{
   padding:12px 12px;
   font-size:14px;
   resize:vertical;
+
+  overflow: auto;
+  max-height: 45vh;
 }
 
 .feedback{
@@ -490,4 +504,9 @@ body{
   .results-summary-grid{grid-template-columns: 1fr;}
   .results-title{font-size:24px;}
   .results-stat-value{font-size:26px;}
+}
+
+.answers-grid .text-answer{
+  grid-column: 1 / -1;
+  width: 100%;
 }

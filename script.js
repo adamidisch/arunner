@@ -242,6 +242,16 @@ prevBtn.addEventListener('click', goToPrevQuestion);
 
 // keyboard arrows
 document.addEventListener('keydown', (event) => {
+  const el = document.activeElement;
+  const typing =
+    el &&
+    (el.tagName === 'INPUT' ||
+      el.tagName === 'TEXTAREA' ||
+      el.isContentEditable);
+
+  // allow arrows to work inside text inputs
+  if (typing) return;
+
   if (event.key === 'ArrowRight') {
     goToNextQuestion();
   } else if (event.key === 'ArrowLeft') {
@@ -903,15 +913,17 @@ if (finishBtn) {
   finishBtn.addEventListener('click', () => {
     const frameInner = document.querySelector('.frame-inner');
 
-    if (frameInner) frameInner.classList.add('fade-out');
     closeGraphModal();
     closeExtractModal();
 
+    // completion animation then report
+    if (frameInner) frameInner.classList.add('finish-anim');
+
     setTimeout(() => {
-      if (frameInner) frameInner.classList.remove('fade-out');
+      if (frameInner) frameInner.classList.remove('finish-anim');
       // snapshot answers with date for this student
       lastAttemptSnapshot = persistAttempt() || buildAttemptDetails();
       showReport();
-    }, 340);
+    }, 680);
   });
 }

@@ -130,7 +130,7 @@ function renderQuestion() {
 
   const q = questions[currentIndex];
   questionNumberEl.textContent = `Q${currentIndex + 1}/${questions.length}`;
-  questionTextEl.textContent = q.question;
+  questionTextEl.textContent = q.question || '';
   answersEl.innerHTML = '';
   feedbackEl.textContent = '';
   extractHolderEl.innerHTML = '';
@@ -145,7 +145,7 @@ function renderQuestion() {
 function renderMcqQuestion(q) {
   const buttons = [];
 
-  q.answers.forEach((ans, idx) => {
+  (q.answers || []).forEach((ans, idx) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'answer-btn';
@@ -192,9 +192,10 @@ function renderTextQuestion(q) {
 
 function startLoadingBar() {
   let p = 0;
+  if (loadBarInner) loadBarInner.style.width = '0%';
   const id = setInterval(() => {
     p += 5;
-    loadBarInner.style.width = `${p}%`;
+    if (loadBarInner) loadBarInner.style.width = `${p}%`;
     if (p >= 90) p = 30;
   }, 150);
   return id;
@@ -202,28 +203,38 @@ function startLoadingBar() {
 
 function stopLoadingBar(id) {
   clearInterval(id);
-  loadBarInner.style.width = '100%';
-  setTimeout(() => loadingEl.classList.add('hidden'), 300);
+  if (loadBarInner) loadBarInner.style.width = '100%';
+  setTimeout(() => {
+    if (loadingEl) loadingEl.classList.add('hidden');
+  }, 300);
 }
 
 async function loadQuestions() {
   let loadId = null;
   try {
-    loadingEl.classList.remove('hidden');
+    if (loadingEl) loadingEl.classList.remove('hidden');
     loadId = startLoadingBar();
 
     const res = await fetch(SHEET_URL);
     const rows = await res.json();
 
-    questions = rows.map((r, i) => ({
+    questions = (rows || []).map((r, i) => ({
       id: r.id || `q${i + 1}`,
-      type: r.type === 'text' ? 'text' : 'mcq',
-      question: r.question,
+      type: (r.type || '').toLowerCase() === 'text' ? 'text' : 'mcq',
+      question: r.question || '',
       answers: [r.answerA, r.answerB, r.answerC, r.answerD].filter(Boolean)
     }));
 
     selectedAnswers = new Array(questions.length).fill(null);
-    stopLoadingBar(loadId);
+
+    if (loadId) stopLoadingBar(loadId);
+
+    // IMPORTANT: show the card (it starts with class "hidden" in HTML)
+    if (cardEl) {
+      cardEl.classList.remove('hidden');
+      cardEl.classList.add('fade-in');
+    }
+
     renderQuestion();
     startTimer();
   } catch (e) {
@@ -235,19 +246,29 @@ async function loadQuestions() {
 
 // ---------------- NAV ----------------
 
-nextBtn.addEventListener('click', () => {
-  if (currentIndex < questions.length - 1) {
-    currentIndex++;
-    renderQuestion();
-  }
-});
+if (nextBtn) {
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    }
+  });
+}
 
-prevBtn.addEventListener('click', () => {
-  if (currentIndex > 0) {
-    currentIndex--;
-    renderQuestion();
-  }
-});
+if (prevBtn) {
+  prevBtn.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderQuestion();
+    }
+  });
+}
+
+if (finishBtn) {
+  finishBtn.addEventListener('click', () => {
+    alert('Saved.');
+  });
+}
 
 // ---------------- INIT ----------------
 

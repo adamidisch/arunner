@@ -35,7 +35,7 @@ const finishBtn = document.getElementById('finishButton');
 
 // login elements
 const loginOverlay = document.getElementById('loginOverlay');
-const loginButton = document.getElementById('loginButton');
+let loginButton = document.getElementById('loginButton');
 const studentNameInput = document.getElementById('studentName');
 const studentCodeInput = document.getElementById('studentCode');
 const studentPhoneInput = document.getElementById('studentPhone');
@@ -94,6 +94,14 @@ extractBackdrop.addEventListener('click', closeExtractModal);
 
 function loadStudentFromStorage() {
   try {
+    const name = (localStorage.getItem('studentName') || '').trim();
+    const code = (localStorage.getItem('studentCode') || '').trim();
+    const phone = (localStorage.getItem('studentPhone') || '').trim();
+
+    if (name && code) {
+      return { name, code, phone };
+    }
+
     const raw = localStorage.getItem('examorio_student');
     if (!raw) return null;
     return JSON.parse(raw);
@@ -104,6 +112,9 @@ function loadStudentFromStorage() {
 
 function saveStudentToStorage(student) {
   try {
+    localStorage.setItem('studentName', student.name || '');
+    localStorage.setItem('studentCode', student.code || '');
+    localStorage.setItem('studentPhone', student.phone || '');
     localStorage.setItem('examorio_student', JSON.stringify(student));
   } catch (_) {}
 }
@@ -160,22 +171,32 @@ function showMessageBanner(message = 'Proceed to exam test', duration = 2000) {
   }, duration);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  if (loginButton) {
-    loginButton.addEventListener('click', () => {
-      const name = (studentNameInput?.value || '').trim();
-      const code = (studentCodeInput?.value || '').trim();
-      const phone = (studentPhoneInput?.value || '').trim();
+function handleLoginClick() {
+  const name = (studentNameInput?.value || '').trim();
+  const code = (studentCodeInput?.value || '').trim();
+  const phone = (studentPhoneInput?.value || '').trim();
 
-      if (!name || !code) {
-        alert('Γράψε όνομα και κωδικό');
-        return;
-      }
-
-      const student = { name, code, phone };
-      finishLogin(student);
-    });
+  if (!name || !code) {
+    alert('Συμπλήρωσε όνομα και κωδικό μαθητή');
+    return;
   }
+
+  const student = { name, code, phone };
+  finishLogin(student);
+}
+
+function attachLoginHandler() {
+  if (!loginButton) return;
+
+  const freshButton = loginButton.cloneNode(true);
+  loginButton.replaceWith(freshButton);
+  loginButton = freshButton;
+
+  loginButton.addEventListener('click', handleLoginClick);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  attachLoginHandler();
 
   const saved = loadStudentFromStorage();
   if (saved) {

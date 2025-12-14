@@ -2,50 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Examorio</title>
+  <title>ARUNNER</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#020617">
-  <style>
-    .message-banner {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      background: #22c55e;
-      color: #052e16;
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-      font-weight: 600;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      z-index: 50;
-    }
-
-    .message-banner.visible {
-      opacity: 1;
-    }
-  </style>
 </head>
 <body>
 
-  <div id="messageBanner" class="message-banner" aria-live="polite">Proceed to exam test</div>
+  <div id="loadingOverlay" class="loading-overlay is-hidden" aria-hidden="true">
+    <div class="loading-panel">
+      <div class="loading-text">Loading ...</div>
+      <div class="loading-bar" aria-hidden="true"><div class="loading-bar-fill"></div></div>
+    </div>
+  </div>
 
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
-      <h2>Examorio</h2>
-      <p class="login-subtitle">Login:</p>
+      <h2>ARUNNER</h2>
+      <p class="login-subtitle">Enter your details so we can save your answers</p>
 
-      <label class="login-label">Student name:
+      <label class="login-label">Student name
         <input id="studentName" class="login-input" type="text" autocomplete="name">
       </label>
 
-      <label class="login-label">Student ID:
+      <label class="login-label">Student code
         <input id="studentCode" class="login-input" type="text">
       </label>
 
-      <label class="login-label">Phone:
+      <label class="login-label">Phone
         <input id="studentPhone" class="login-input" type="tel" autocomplete="tel">
       </label>
 
@@ -60,14 +45,9 @@
         <div class="pill pill-right"><span class="pill-label">TIME</span><span id="timerDisplay" class="pill-time">90:00</span></div>
       </div>
 
-      <div id="loading" class="loading-overlay hidden" aria-live="polite" aria-busy="true">
-  <div class="loading-box">
-    <div class="loading-title">Loading ...</div>
-    <div class="loading-bar"><div id="loadBar" class="loading-bar-inner"></div></div>
-  </div>
-</div>
+      <div id="loading" class="loading hidden" aria-hidden="true">Loading ...</div>
 
-      <div id="questionCard" class="card hidden" aria-live="polite">
+      <div id="questionCard" class="card hidden fade" aria-live="polite">
         <div class="question-title" id="questionText"></div>
 
         <div class="media-wrap">
@@ -107,21 +87,63 @@
     </div>
   </div>
 
+
+  <div id="reportOverlay" class="report-overlay hidden" aria-hidden="true">
+    <div class="results-shell">
+      <div class="results-top">
+        <div class="results-badge" aria-hidden="true">
+          <span id="reportBadge">0%</span>
+        </div>
+        <div class="results-title">ARUNNER Results</div>
+        <div class="results-sub">Test completed <span class="results-check" aria-hidden="true">✅</span></div>
+        <div class="results-student" id="reportStudent"></div>
+      </div>
+
+      <div class="results-panel">
+        <div class="results-panel-title">Summary</div>
+        <div class="results-summary-grid">
+          <div class="results-stat">
+            <div class="results-stat-label">Total questions</div>
+            <div class="results-stat-value" id="reportTotal">0</div>
+          </div>
+          <div class="results-stat">
+            <div class="results-stat-label">Answered</div>
+            <div class="results-stat-value" id="reportAnswered">0</div>
+          </div>
+          <div class="results-stat">
+            <div class="results-stat-label">Correct</div>
+            <div class="results-stat-value good" id="reportCorrect">0</div>
+          </div>
+          <div class="results-stat">
+            <div class="results-stat-label">Wrong</div>
+            <div class="results-stat-value bad" id="reportWrong">0</div>
+          </div>
+          <div class="results-stat">
+            <div class="results-stat-label">Skipped</div>
+            <div class="results-stat-value" id="reportSkipped">0</div>
+          </div>
+          <div class="results-stat">
+            <div class="results-stat-label">Accuracy</div>
+            <div class="results-stat-value" id="reportAccuracy">0%</div>
+          </div>
+          <div class="results-stat wide">
+            <div class="results-stat-label">Time used</div>
+            <div class="results-stat-value" id="reportTime">0:00</div>
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button id="reportRestart" class="btn btn-solid" type="button">Restart</button>
+          <button id="reportExportPdf" class="btn btn-ghost" type="button">Export as PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(function (registration) {
-          registration.update();
-        })
-        .catch(function () {});
-
-      let hasRefreshed = false;
-      navigator.serviceWorker.addEventListener('controllerchange', function () {
-        if (hasRefreshed) return;
-        hasRefreshed = true;
-        window.location.reload();
-      });
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
     }
   </script>
 

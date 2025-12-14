@@ -28,7 +28,7 @@ const feedbackEl = document.getElementById('feedback');
 
 const prevBtn = document.getElementById('prevQuestion');
 const timerEl = document.getElementById('timerDisplay');
-let timerSeconds = 90 * 60;
+let timerSeconds = 60 * 60;
 let timerIntervalId = null;
 let timerStarted = false;
 
@@ -824,6 +824,7 @@ if (reportRestartBtn) {
     if (reportOverlay) {
       reportOverlay.classList.remove('show');
       reportOverlay.classList.add('hidden');
+  document.body.classList.remove('no-scroll');
       reportOverlay.setAttribute('aria-hidden', 'true');
     }
     loginOverlay.classList.remove('hidden');
@@ -874,7 +875,7 @@ function buildReport() {
   const skipped = Math.max(0, total - answered);
   const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
 
-  const elapsed = (90 * 60) - timerSeconds;
+  const elapsed = (60 * 60) - timerSeconds;
   const timeText = formatTimeMMSS(elapsed);
 
   return { total, answered, correct, wrong, skipped, accuracy, timeText };
@@ -904,6 +905,7 @@ function showReport() {
     // next tick for transition
     requestAnimationFrame(() => {
       reportOverlay.classList.add('show');
+      document.body.classList.add('no-scroll');
       reportOverlay.setAttribute('aria-hidden', 'false');
     });
   }

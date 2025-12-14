@@ -64,6 +64,24 @@ body{
   background: rgba(0,0,0,0.18);
 }
 
+/* Make top pills plain text on mobile and desktop */
+#questionNumber.pill{
+  border:none;
+  background: transparent;
+  padding:0;
+}
+.topbar .pill-right{
+  border:none;
+  background: transparent;
+  padding:0;
+}
+#timerDisplay.pill-time{
+  border:none;
+  background: transparent;
+  padding:0;
+  min-width:auto;
+}
+
 .loading{
   text-align:center;
   padding:14px 0;
@@ -238,8 +256,11 @@ body{
   font-size:14px;
   resize:vertical;
 
-  overflow: auto;
+  /* Always show an inner scroll area when content grows */
+  overflow-y: scroll;
+  overflow-x: hidden;
   max-height: 45vh;
+  scrollbar-gutter: stable;
 }
 
 .feedback{
@@ -510,3 +531,76 @@ body{
   grid-column: 1 / -1;
   width: 100%;
 }
+
+
+/* Mobile report fullscreen with scroll and fixed actions */
+@media (max-width: 520px){
+  .report-overlay{
+    align-items:stretch;
+    padding:12px;
+  }
+  .results-shell{
+    width:100%;
+    height: calc(100vh - 24px);
+    padding:16px 12px 12px;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .results-top{
+    padding:6px 6px 10px;
+    flex:0 0 auto;
+  }
+  .results-panel{
+    flex:1 1 auto;
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .results-actions{
+    position: sticky;
+    bottom: 0;
+    padding-top: 12px;
+    background: linear-gradient(to bottom, rgba(2, 10, 24, 0), rgba(2, 10, 24, 0.92) 45%, rgba(2, 10, 24, 0.98));
+  }
+}
+
+
+
+body.no-scroll{overflow:hidden;}
+
+/* Report: keep actions fixed within report and scroll only the panel */
+.results-panel{
+  display:flex;
+  flex-direction:column;
+}
+
+.results-actions{
+  position: sticky;
+  bottom: 0;
+  background: rgba(2, 10, 24, 0.85);
+  padding: 12px 0 6px;
+}
+
+/* Mobile: fullscreen report */
+@media (max-width: 520px){
+  .report-overlay{align-items:stretch;}
+  .results-shell{
+    width:100vw;
+    height:100vh;
+    border-radius:0;
+    padding:16px 12px 12px;
+    display:flex;
+    flex-direction:column;
+  }
+  .results-panel{
+    flex:1;
+    overflow:auto;
+    max-height:none;
+    padding-bottom:74px;
+  }
+}
+
+
+/* Keep textarea scrollbar visible on WebKit */
+.text-answer::-webkit-scrollbar{width:12px}

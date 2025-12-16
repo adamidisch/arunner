@@ -1,6 +1,10 @@
 // Examorio quiz engine
 
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   // endpoint για ερωτήσεις
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   
+const HANDWRITE_API = 'https://script.google.com/macros/s/AKfycbxSoLeN2iSaQkNr-DCgA_C3u_b4KuudIxyN-laJdPWKnZiUIa7VWc4AiAIT_28G_v7U0g/exec';
+// Always use an https capture page so QR works even when the quiz is opened via file:// on a laptop
+const CAPTURE_BASE_URL = 'https://arunner2.netlify.app/capture.html';
+// endpoint για ερωτήσεις
 const ANSWERS_URL = 'https://script.google.com/macros/s/AKfycbx2cZydB4HWruvp9gW4Nu5tCgipjDcSbCJ5sgxpeLJulLcKxicuwb--xDd8pVGtEw5Q3A/exec'; // endpoint για αποθήκευση απαντήσεων
 
 const EXTRACTS = {
@@ -88,6 +92,64 @@ graphImg.addEventListener('click', () => {
   if (!graphImg.src) return;
   openGraphModal();
 });
+
+// ===== Handwritten (QR) helpers =====
+function openQrModal() {
+  const m = document.getElementById('qrModal');
+  if (!m) return;
+  m.classList.remove('hidden');
+  m.setAttribute('aria-hidden', 'false');
+}
+
+function closeQrModal() {
+  const m = document.getElementById('qrModal');
+  if (!m) return;
+  m.classList.add('hidden');
+  m.setAttribute('aria-hidden', 'true');
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.classList && e.target.classList.contains('qr-close')) closeQrModal();
+  if (e.target && e.target.closest && e.target.closest('#qrModal .modal-backdrop')) closeQrModal();
+});
+
+async function hwCreateCapture({ student, examId, questionId }) {
+  const url = new URL(HANDWRITE_API);
+  url.searchParams.set('action', 'createCapture');
+  url.searchParams.set('studentName', student?.name || '');
+  url.searchParams.set('studentCode', student?.code || '');
+  url.searchParams.set('studentPhone', student?.phone || '');
+  url.searchParams.set('examId', examId || 'default');
+  url.searchParams.set('questionId', questionId || '');
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+async function hwGetStatus(cid) {
+  const url = new URL(HANDWRITE_API);
+  url.searchParams.set('action', 'getCaptureStatus');
+  url.searchParams.set('cid', cid);
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+function hwStartPolling(cid, onUploaded) {
+  let tries = 0;
+  const t = setInterval(async () => {
+    tries++;
+    try {
+      const st = await hwGetStatus(cid);
+      if (st && st.ok && st.status === 'uploaded' && st.fileUrl) {
+        clearInterval(t);
+        onUploaded(st);
+      }
+    } catch (_) {}
+
+    if (tries > 90) clearInterval(t);
+  }, 2000);
+
+  return () => clearInterval(t);
+}
 graphCloseBtn.addEventListener('click', closeGraphModal);
 graphBackdrop.addEventListener('click', closeGraphModal);
 
@@ -686,6 +748,95 @@ function renderTextQuestion(q) {
   textarea.placeholder = 'Type your answer here';
 
   answersEl.appendChild(textarea);
+
+
+// handwritten upload button (QR -> phone -> upload -> show image)
+const handBtn = document.createElement('button');
+handBtn.type = 'button';
+handBtn.className = 'upload-hand-btn';
+handBtn.textContent = 'Upload handwritten answer';
+answersEl.appendChild(handBtn);
+
+const previewWrap = document.createElement('div');
+answersEl.appendChild(previewWrap);
+
+// show stored handwritten image when navigating back
+const saved2 = loadLocalAnswer(q.id || '');
+if (saved2 && saved2.handwrittenUrl) {
+  const img0 = document.createElement('img');
+  img0.src = saved2.handwrittenUrl;
+  img0.alt = 'Handwritten answer';
+  img0.className = 'handwritten-preview';
+  previewWrap.appendChild(img0);
+  handBtn.textContent = 'Handwritten uploaded ✅';
+}
+
+handBtn.addEventListener('click', async () => {
+  if (!currentStudent) return;
+
+  handBtn.disabled = true;
+  handBtn.textContent = 'Preparing QR...';
+
+  const created = await hwCreateCapture({
+    student: currentStudent,
+    examId: 'exam1',
+    questionId: q.id || ''
+  });
+
+  if (!created || !created.ok || !created.cid) {
+    handBtn.disabled = false;
+    handBtn.textContent = 'Upload handwritten answer';
+    return;
+  }
+
+  const cid = created.cid;
+  // IMPORTANT: never build a QR link from location.* because the quiz can be opened via file:// on laptops.
+  // Use the hosted capture page so the phone can always open it.
+  const captureUrl = CAPTURE_BASE_URL + '?cid=' + encodeURIComponent(cid);
+
+  openQrModal();
+  const hint = document.getElementById('qrHint');
+  if (hint) hint.textContent = 'Scan with phone and upload a photo. It will appear here automatically.';
+  const canvas = document.getElementById('qrCanvas');
+  const hint2 = document.getElementById('qrHint');
+
+  if (canvas) {
+    // ensure canvas has a real drawing buffer
+    canvas.width = 420;
+    canvas.height = 420;
+  }
+
+  if (window.QRCode && canvas) {
+    QRCode.toCanvas(canvas, captureUrl, { margin: 1, width: 420 }, function (err) {
+      if (err && hint2) hint2.textContent = 'QR error. Open this link on your phone: ' + captureUrl;
+    });
+  } else {
+    if (hint2) hint2.textContent = 'QR not available. Open this link on your phone: ' + captureUrl;
+  }
+
+  handBtn.textContent = 'Waiting for upload...';
+
+  hwStartPolling(cid, (st) => {
+    previewWrap.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = st.fileUrl;
+    img.alt = 'Handwritten answer';
+    img.className = 'handwritten-preview';
+    previewWrap.appendChild(img);
+
+    saveLocalAnswer(q.id || '', {
+      ...(loadLocalAnswer(q.id || '') || {}),
+      handwrittenCid: cid,
+      handwrittenUrl: st.fileUrl,
+      timestamp: new Date().toISOString()
+    });
+
+    closeQrModal();
+    handBtn.disabled = false;
+    handBtn.textContent = 'Handwritten uploaded ✅';
+  });
+});
+
 
   // auto-save (local + server) with debounce
   let saveTimeout = null;

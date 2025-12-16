@@ -1,10 +1,11 @@
-const CACHE_NAME = 'examorio-cache-v1';
+const CACHE_NAME = 'examorio-cache-v2';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './script.js',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  './capture.html'
 ];
 
 self.addEventListener('install', (event) => {

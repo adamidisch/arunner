@@ -87,6 +87,16 @@
     </div>
   </div>
 
+    <div id="qrModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content" style="max-width:min(520px, 96vw)">
+        <button class="modal-close qr-close" aria-label="Close">&times;</button>
+        <div style="font-weight:1000;margin-bottom:10px">Scan to upload handwritten answer</div>
+        <canvas id="qrCanvas" width="420" height="420" style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto;"></canvas>
+        <div id="qrHint" style="margin-top:10px;opacity:0.85;font-size:13px"></div>
+      </div>
+    </div>
+
 
   <div id="reportOverlay" class="report-overlay hidden" aria-hidden="true">
     <div class="results-shell">
@@ -140,6 +150,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

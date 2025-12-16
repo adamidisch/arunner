@@ -638,4 +638,22 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-a.btn{display:inline-block;text-decoration:none;}
+/* --- QR modal scan reliability tweaks --- */
+.qr-box{
+  background:#ffffff;
+  padding:18px;
+  border-radius:16px;
+  width:fit-content;
+  margin:0 auto;
+  box-shadow:0 12px 40px rgba(0,0,0,0.35);
+}
+.qr-img{
+  width:min(340px, 78vw);
+  height:auto;
+  display:block;
+  image-rendering: pixelated;
+}
+#qrHint{
+  margin-top:12px !important;
+  line-height:1.35;
+}

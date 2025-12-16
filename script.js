@@ -106,28 +106,8 @@ function closeQrModal() {
   m.setAttribute('aria-hidden', 'true');
 }
 
-
-function openHandwrittenModal(imageUrl) {
-  const m = document.getElementById('handwrittenModal');
-  const img = document.getElementById('handwrittenModalImg');
-  const dl = document.getElementById('handwrittenDownloadBtn');
-  if (!m || !img || !dl) return;
-  img.src = imageUrl;
-  dl.href = imageUrl;
-  m.classList.remove('hidden');
-  m.setAttribute('aria-hidden', 'false');
-}
-
-function closeHandwrittenModal() {
-  const m = document.getElementById('handwrittenModal');
-  if (!m) return;
-  m.classList.add('hidden');
-  m.setAttribute('aria-hidden', 'true');
-}
-
 document.addEventListener('click', (e) => {
   if (e.target && e.target.classList && e.target.classList.contains('qr-close')) closeQrModal();
-  if (e.target && e.target.classList && e.target.classList.contains('handwritten-close')) closeHandwrittenModal();
   if (e.target && e.target.closest && e.target.closest('#qrModal .modal-backdrop')) closeQrModal();
 });
 
@@ -786,16 +766,10 @@ if (saved2 && saved2.handwrittenUrl) {
   img0.alt = 'Handwritten answer';
   img0.className = 'handwritten-preview';
   previewWrap.appendChild(img0);
-  handBtn.textContent = 'View handwritten ✅';
+  handBtn.textContent = 'Handwritten uploaded ✅';
 }
 
 handBtn.addEventListener('click', async () => {
-  const existing = loadLocalAnswer(q.id || '');
-  if (existing && existing.handwrittenUrl) {
-    openHandwrittenModal(existing.handwrittenUrl);
-    return;
-  }
-
   if (!currentStudent) return;
 
   handBtn.disabled = true;
@@ -819,22 +793,28 @@ handBtn.addEventListener('click', async () => {
   openQrModal();
   const hint = document.getElementById('qrHint');
   if (hint) hint.textContent = 'Scan with phone and upload a photo. It will appear here automatically.';
-  const canvas = document.getElementById('qrCanvas');
+  const imgEl = document.getElementById('qrImg');
   const hint2 = document.getElementById('qrHint');
 
-  if (canvas) {
-    // ensure canvas has a real drawing buffer
-    canvas.width = 420;
-    canvas.height = 420;
+  const qcUrl = 'https://quickchart.io/qr';
+  const googleUrl = 'https://chart.googleapis.com/chart';
+
+  const buildQuickChart = (text) =>
+    qcUrl + '?size=420&text=' + encodeURIComponent(text);
+
+  const buildGoogleChart = (text) =>
+    googleUrl + '?cht=qr&chs=420x420&chld=M|1&chl=' + encodeURIComponent(text);
+
+  if (imgEl) {
+    imgEl.onload = null;
+    imgEl.onerror = null;
+    imgEl.src = buildQuickChart(captureUrl);
+    imgEl.onerror = () => {
+      imgEl.src = buildGoogleChart(captureUrl);
+    };
   }
 
-  if (window.QRCode && canvas) {
-    QRCode.toCanvas(canvas, captureUrl, { margin: 1, width: 420 }, function (err) {
-      if (err && hint2) hint2.textContent = 'QR error. Open this link on your phone: ' + captureUrl;
-    });
-  } else {
-    if (hint2) hint2.textContent = 'QR not available. Open this link on your phone: ' + captureUrl;
-  }
+  if (hint2) hint2.textContent = 'Tip: move your phone slightly back if scan fails. Or open this link on your phone: ' + captureUrl;
 
   handBtn.textContent = 'Waiting for upload...';
 
@@ -855,7 +835,7 @@ handBtn.addEventListener('click', async () => {
 
     closeQrModal();
     handBtn.disabled = false;
-    handBtn.textContent = 'View handwritten ✅';
+    handBtn.textContent = 'Handwritten uploaded ✅';
   });
 });
 

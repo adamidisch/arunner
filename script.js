@@ -1,7 +1,5 @@
 // Examorio quiz engine
 
-const CAPTURE_BASE_URL = 'https://arunner2.netlify.app/';
-
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   
 const HANDWRITE_API = 'https://script.google.com/macros/s/AKfycbxSoLeN2iSaQkNr-DCgA_C3u_b4KuudIxyN-laJdPWKnZiUIa7VWc4AiAIT_28G_v7U0g/exec';
 // endpoint για ερωτήσεις
@@ -790,8 +788,7 @@ handBtn.addEventListener('click', async () => {
   }
 
   const cid = created.cid;
-  const baseForCapture = (location.protocol === 'file:' || location.origin === 'null') ? CAPTURE_BASE_URL : (location.origin + '/');
-  const captureUrl = new URL(created.captureUrl, baseForCapture).toString();
+  const captureUrl = location.origin + '/' + created.captureUrl;
 
   openQrModal();
   const hint = document.getElementById('qrHint');
@@ -799,30 +796,47 @@ handBtn.addEventListener('click', async () => {
   const canvas = document.getElementById('qrCanvas');
   const hint2 = document.getElementById('qrHint');
 
-  if (canvas) {
-    // ensure canvas has a real drawing buffer
-    canvas.width = 420;
-    canvas.height = 420;
+  // QR rendering (zero-dependency): use an <img> QR so it works reliably on Netlify
+  // This avoids external QR JS libraries that may fail to load.
+  const modal = document.getElementById('qrModal');
+  let qrImg = document.getElementById('qrImg');
+
+  // Prefer showing an image QR in all cases
+  if (!qrImg && modal) {
+    const content = modal.querySelector('.modal-content');
+    if (content) {
+      qrImg = document.createElement('img');
+      qrImg.id = 'qrImg';
+      qrImg.alt = 'QR code';
+      qrImg.style.maxWidth = '420px';
+      qrImg.style.width = '100%';
+      qrImg.style.height = 'auto';
+      qrImg.style.display = 'block';
+      qrImg.style.margin = '0 auto';
+      // insert after canvas if present otherwise at the end
+      const c = document.getElementById('qrCanvas');
+      if (c && c.parentNode) c.insertAdjacentElement('afterend', qrImg);
+      else content.appendChild(qrImg);
+    }
   }
 
-  if (window.QRCode && canvas) {
-    QRCode.toCanvas(canvas, captureUrl, { margin: 1, width: 420 }, function (err) {
-      if (err && hint2) hint2.textContent = 'QR error. Open this link on your phone: ' + captureUrl;
-    });
-  } else if (canvas) {
-    // Fallback: render QR as an <img> using Google Chart API (works even if QR library is blocked)
-    const fallbackUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=420x420&chl=' + encodeURIComponent(captureUrl);
-    const img = document.createElement('img');
-    img.src = fallbackUrl;
-    img.alt = 'QR code';
-    img.style.width = '420px';
-    img.style.height = '420px';
-    img.style.display = 'block';
-    img.style.margin = '0 auto';
-    // hide canvas and place img right after it
-    canvas.style.display = 'none';
-    if (canvas.parentNode) canvas.parentNode.appendChild(img);
-    if (hint2) hint2.textContent = 'Scan the QR with your phone.';
+  // Hide canvas (keep it in DOM to avoid touching UI/layout elsewhere)
+  if (canvas) canvas.style.display = 'none';
+
+  const enc = encodeURIComponent(captureUrl);
+  const quickchart = 'https://quickchart.io/qr?size=420&text=' + enc;
+  const google = 'https://chart.googleapis.com/chart?cht=qr&chs=420x420&chl=' + enc;
+
+  if (qrImg) {
+    qrImg.onerror = () => {
+      // fallback provider
+      if (qrImg.src !== google) qrImg.src = google;
+      else if (hint2) hint2.textContent = 'QR image blocked. Open this link on your phone: ' + captureUrl;
+    };
+    qrImg.onload = () => {
+      if (hint2) hint2.textContent = 'Scan with phone and upload a photo. If QR fails open this link: ' + captureUrl;
+    };
+    qrImg.src = quickchart;
   } else {
     if (hint2) hint2.textContent = 'QR not available. Open this link on your phone: ' + captureUrl;
   }

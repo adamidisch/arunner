@@ -636,3 +636,6 @@ body.no-scroll{overflow:hidden;}
   margin-top:10px;
   border:1px solid rgba(245,200,75,0.35);
 }
+
+
+a.btn{display:inline-block;text-decoration:none;}

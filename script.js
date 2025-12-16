@@ -1,9 +1,9 @@
 // Examorio quiz engine
 
+const CAPTURE_BASE_URL = 'https://arunner2.netlify.app/';
+
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   
 const HANDWRITE_API = 'https://script.google.com/macros/s/AKfycbxSoLeN2iSaQkNr-DCgA_C3u_b4KuudIxyN-laJdPWKnZiUIa7VWc4AiAIT_28G_v7U0g/exec';
-// Always use an https capture page so QR works even when the quiz is opened via file:// on a laptop
-const CAPTURE_BASE_URL = 'https://arunner2.netlify.app/capture.html';
 // endpoint για ερωτήσεις
 const ANSWERS_URL = 'https://script.google.com/macros/s/AKfycbx2cZydB4HWruvp9gW4Nu5tCgipjDcSbCJ5sgxpeLJulLcKxicuwb--xDd8pVGtEw5Q3A/exec'; // endpoint για αποθήκευση απαντήσεων
 
@@ -783,16 +783,15 @@ handBtn.addEventListener('click', async () => {
     questionId: q.id || ''
   });
 
-  if (!created || !created.ok || !created.cid) {
+  if (!created || !created.ok || !created.cid || !created.captureUrl) {
     handBtn.disabled = false;
     handBtn.textContent = 'Upload handwritten answer';
     return;
   }
 
   const cid = created.cid;
-  // IMPORTANT: never build a QR link from location.* because the quiz can be opened via file:// on laptops.
-  // Use the hosted capture page so the phone can always open it.
-  const captureUrl = CAPTURE_BASE_URL + '?cid=' + encodeURIComponent(cid);
+  const baseForCapture = (location.protocol === 'file:' || location.origin === 'null') ? CAPTURE_BASE_URL : (location.origin + '/');
+  const captureUrl = new URL(created.captureUrl, baseForCapture).toString();
 
   openQrModal();
   const hint = document.getElementById('qrHint');
@@ -810,6 +809,20 @@ handBtn.addEventListener('click', async () => {
     QRCode.toCanvas(canvas, captureUrl, { margin: 1, width: 420 }, function (err) {
       if (err && hint2) hint2.textContent = 'QR error. Open this link on your phone: ' + captureUrl;
     });
+  } else if (canvas) {
+    // Fallback: render QR as an <img> using Google Chart API (works even if QR library is blocked)
+    const fallbackUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=420x420&chl=' + encodeURIComponent(captureUrl);
+    const img = document.createElement('img');
+    img.src = fallbackUrl;
+    img.alt = 'QR code';
+    img.style.width = '420px';
+    img.style.height = '420px';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
+    // hide canvas and place img right after it
+    canvas.style.display = 'none';
+    if (canvas.parentNode) canvas.parentNode.appendChild(img);
+    if (hint2) hint2.textContent = 'Scan the QR with your phone.';
   } else {
     if (hint2) hint2.textContent = 'QR not available. Open this link on your phone: ' + captureUrl;
   }

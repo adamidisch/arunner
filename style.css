@@ -638,10 +638,16 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-/* Handwritten modal actions */
-.modal-actions{
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  margin-top:12px;
+/* Handwritten view button (opens modal + download) */
+.handwritten-view-btn{
+  border:2px solid #60a5fa;
+  border-radius:999px;
+  background: rgba(0,0,0,0.12);
+  color:#eaf2ff;
+  padding:8px 14px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:13px;
+  width:100%;
+  margin-top:10px;
 }

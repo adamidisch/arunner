@@ -95,20 +95,21 @@
         <canvas id="qrCanvas" width="420" height="420" style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto;"></canvas>
         <div id="qrHint" style="margin-top:10px;opacity:0.85;font-size:13px"></div>
       </div>
-    
-    <div id="handModal" class="modal hidden" aria-hidden="true">
+    </div>
+
+
+
+    <div id="handwrittenModal" class="modal hidden" aria-hidden="true">
       <div class="modal-backdrop"></div>
       <div class="modal-content" style="max-width:min(940px, 96vw)">
-        <button class="modal-close hand-close" aria-label="Close">&times;</button>
-        <div style="font-weight:1000;margin-bottom:10px">Handwritten answer</div>
-        <img id="handModalImg" src="" alt="Handwritten answer" class="modal-image">
-        <div class="modal-actions">
-          <button id="handDownloadBtn" class="btn btn-solid" type="button">Download</button>
+        <button class="modal-close handwritten-close" aria-label="Close">&times;</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-weight:1000">Handwritten answer</div>
+          <a id="handwrittenDownload" class="btn btn-solid" href="#" download="handwritten.jpg" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;font-size:13px">Download</a>
         </div>
+        <img id="handwrittenModalImg" src="" alt="Handwritten answer" class="modal-image">
       </div>
     </div>
-</div>
-
 
   <div id="reportOverlay" class="report-overlay hidden" aria-hidden="true">
     <div class="results-shell">

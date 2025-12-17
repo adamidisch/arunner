@@ -1,3 +1,4 @@
+initHandwrittenModal_();
 // Examorio quiz engine
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxPgnfeiHKtJZ2x_y3ZEopgx1rzOrh1ksq0rmra9BIFBk_aBILohngFViARGkZuQwWW7w/exec';   
@@ -91,6 +92,59 @@ graphImg.addEventListener('click', () => {
   openGraphModal();
 });
 
+
+
+// ===== Handwritten preview modal =====
+function toDriveDownloadUrl_(url){
+  if (!url) return '#';
+  try{
+    if (url.includes('drive.google.com/uc?')) {
+      if (url.includes('export=view')) return url.replace('export=view','export=download');
+      if (url.includes('export=download')) return url;
+      return url + (url.includes('?') ? '&' : '?') + 'export=download';
+    }
+  }catch(e){}
+  return url;
+}
+
+function openHandwrittenModal_(url){
+  const m = document.getElementById('handwrittenModal');
+  const img = document.getElementById('handwrittenModalImg');
+  const dl = document.getElementById('handwrittenDownload');
+  if (!m || !img) return;
+
+  img.src = url || '';
+  if (dl){
+    dl.href = toDriveDownloadUrl_(url || '#');
+    dl.setAttribute('target','_blank');
+    dl.setAttribute('rel','noopener');
+  }
+
+  m.classList.add('show');
+  m.setAttribute('aria-hidden','false');
+}
+
+function closeHandwrittenModal_(){
+  const m = document.getElementById('handwrittenModal');
+  const img = document.getElementById('handwrittenModalImg');
+  if (!m) return;
+  m.classList.remove('show');
+  m.setAttribute('aria-hidden','true');
+  if (img) img.src = '';
+}
+
+function initHandwrittenModal_(){
+  const m = document.getElementById('handwrittenModal');
+  if (!m) return;
+  const closeBtn = document.getElementById('handwrittenClose');
+  const backdrop = document.getElementById('handwrittenBackdrop');
+  if (closeBtn) closeBtn.addEventListener('click', closeHandwrittenModal_);
+  if (backdrop) backdrop.addEventListener('click', closeHandwrittenModal_);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && m.classList.contains('show')) closeHandwrittenModal_();
+  });
+}
+
 // ===== Handwritten (QR) helpers =====
 function openQrModal() {
   const m = document.getElementById('qrModal');
@@ -106,39 +160,10 @@ function closeQrModal() {
   m.setAttribute('aria-hidden', 'true');
 }
 
-
-
-// ===== Handwritten preview modal =====
-function openHandwrittenModal(url) {
-  const m = document.getElementById('handwrittenModal');
-  const img = document.getElementById('handwrittenModalImg');
-  const dl = document.getElementById('handwrittenDownload');
-  if (!m || !img) return;
-
-  img.src = url || '';
-  if (dl) {
-    dl.href = url || '#';
-    dl.setAttribute('download', 'handwritten.jpg');
-  }
-
-  m.classList.remove('hidden');
-  m.setAttribute('aria-hidden', 'false');
-}
-
-function closeHandwrittenModal() {
-  const m = document.getElementById('handwrittenModal');
-  const img = document.getElementById('handwrittenModalImg');
-  if (!m) return;
-  if (img) img.src = '';
-  m.classList.add('hidden');
-  m.setAttribute('aria-hidden', 'true');
-}
 document.addEventListener('click', (e) => {
   if (e.target && e.target.classList && e.target.classList.contains('qr-close')) closeQrModal();
   if (e.target && e.target.closest && e.target.closest('#qrModal .modal-backdrop')) closeQrModal();
-
-  if (e.target && e.target.classList && e.target.classList.contains('handwritten-close')) closeHandwrittenModal();
-  if (e.target && e.target.closest && e.target.closest('#handwrittenModal .modal-backdrop')) closeHandwrittenModal();});
+});
 
 async function hwCreateCapture({ student, examId, questionId }) {
   const url = new URL(HANDWRITE_API);
@@ -714,8 +739,7 @@ function renderMcqQuestion(q) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'answer-option';
-    const letter = letterFromIndex(index);
-    btn.textContent = (letter ? (letter + '. ') : '') + answerText;
+    btn.textContent = answerText;
 
     // restore selection
     if (savedIndex !== null && index === savedIndex) {
@@ -786,23 +810,33 @@ handBtn.textContent = 'Upload handwritten answer';
 answersEl.appendChild(handBtn);
 
 const previewWrap = document.createElement('div');
+previewWrap.className = 'handwritten-actions';
 answersEl.appendChild(previewWrap);
 
 // show stored handwritten image when navigating back
 const saved2 = loadLocalAnswer(q.id || '');
 if (saved2 && saved2.handwrittenUrl) {
-  // keep UI clean: show a view button that opens modal + allow download
+  handBtn.dataset.handwrittenUrl = saved2.handwrittenUrl;
+  handBtn.textContent = 'Handwritten answer ✅';
+
   const viewBtn = document.createElement('button');
   viewBtn.type = 'button';
   viewBtn.className = 'handwritten-view-btn';
-  viewBtn.textContent = 'Handwritten answer';
-  viewBtn.addEventListener('click', () => openHandwrittenModal(saved2.handwrittenUrl));
-  previewWrap.innerHTML = '';
+  viewBtn.textContent = 'View';
+  viewBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    openHandwrittenModal_(saved2.handwrittenUrl);
+  });
   previewWrap.appendChild(viewBtn);
-  handBtn.textContent = 'Handwritten uploaded ✅';
 }
 
 handBtn.addEventListener('click', async () => {
+  const existingUrl = handBtn.dataset.handwrittenUrl;
+  if (existingUrl) {
+    openHandwrittenModal_(existingUrl);
+    return;
+  }
+
   if (!currentStudent) return;
 
   handBtn.disabled = true;
@@ -821,8 +855,7 @@ handBtn.addEventListener('click', async () => {
   }
 
   const cid = created.cid;
-  const captureOrigin = 'https://arunner2.netlify.app';
-  const captureUrl = captureOrigin + '/' + String(created.captureUrl).replace(/^\/+/, '');
+  const captureUrl = location.origin + '/' + created.captureUrl;
 
   openQrModal();
   const hint = document.getElementById('qrHint');
@@ -830,71 +863,29 @@ handBtn.addEventListener('click', async () => {
   const canvas = document.getElementById('qrCanvas');
   const hint2 = document.getElementById('qrHint');
 
-  // QR rendering (zero-dependency): use an <img> QR so it works reliably on Netlify
-  // This avoids external QR JS libraries that may fail to load.
-  const modal = document.getElementById('qrModal');
-  let qrImg = document.getElementById('qrImg');
-
-  // Prefer showing an image QR in all cases
-  if (!qrImg && modal) {
-    const content = modal.querySelector('.modal-content');
-    if (content) {
-      qrImg = document.createElement('img');
-      qrImg.id = 'qrImg';
-      qrImg.alt = 'QR code';
-      qrImg.style.maxWidth = '420px';
-      qrImg.style.width = '100%';
-      qrImg.style.height = 'auto';
-      qrImg.style.display = 'block';
-      qrImg.style.margin = '0 auto';
-      // insert after canvas if present otherwise at the end
-      const c = document.getElementById('qrCanvas');
-      if (c && c.parentNode) c.insertAdjacentElement('afterend', qrImg);
-      else content.appendChild(qrImg);
-    }
+  if (canvas) {
+    // ensure canvas has a real drawing buffer
+    canvas.width = 420;
+    canvas.height = 420;
   }
 
-  // Hide canvas (keep it in DOM to avoid touching UI/layout elsewhere)
-  if (canvas) canvas.style.display = 'none';
-
-  const enc = encodeURIComponent(captureUrl);
-  const quickchart = 'https://quickchart.io/qr?size=420&text=' + enc;
-  const google = 'https://chart.googleapis.com/chart?cht=qr&chs=420x420&chl=' + enc;
-
-  if (qrImg) {
-    qrImg.onerror = () => {
-      // fallback provider
-      if (qrImg.src !== google) qrImg.src = google;
-      else if (hint2) {
-        hint2.innerHTML = 'QR image blocked.<br>Open this link on your phone:<br>' +
-          '<a href="' + captureUrl + '" target="_blank">' + captureUrl + '</a>';
-      }
-    };
-    qrImg.onload = () => {
-      if (hint2) {
-        hint2.innerHTML = 'Scan with phone and upload a photo.<br>' +
-          'If QR fails open this link on your phone:<br>' +
-          '<a href="' + captureUrl + '" target="_blank">' + captureUrl + '</a>';
-      }
-    };
-    qrImg.src = quickchart;
+  if (window.QRCode && canvas) {
+    QRCode.toCanvas(canvas, captureUrl, { margin: 1, width: 420 }, function (err) {
+      if (err && hint2) hint2.textContent = 'QR error. Open this link on your phone: ' + captureUrl;
+    });
   } else {
-    if (hint2) {
-      hint2.innerHTML = 'QR not available.<br>Open this link on your phone:<br>' +
-        '<a href="' + captureUrl + '" target="_blank">' + captureUrl + '</a>';
-    }
+    if (hint2) hint2.textContent = 'QR not available. Open this link on your phone: ' + captureUrl;
   }
 
   handBtn.textContent = 'Waiting for upload...';
 
   hwStartPolling(cid, (st) => {
     previewWrap.innerHTML = '';
-    const viewBtn = document.createElement('button');
-    viewBtn.type = 'button';
-    viewBtn.className = 'handwritten-view-btn';
-    viewBtn.textContent = 'Handwritten answer';
-    viewBtn.addEventListener('click', () => openHandwrittenModal(st.fileUrl));
-    previewWrap.appendChild(viewBtn);
+    const img = document.createElement('img');
+    img.src = st.fileUrl;
+    img.alt = 'Handwritten answer';
+    img.className = 'handwritten-preview';
+    previewWrap.appendChild(img);
 
     saveLocalAnswer(q.id || '', {
       ...(loadLocalAnswer(q.id || '') || {}),

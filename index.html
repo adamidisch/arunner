@@ -98,6 +98,19 @@
     </div>
 
 
+
+    <div id="handwrittenModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content" style="max-width:min(940px, 96vw)">
+        <button class="modal-close handwritten-close" aria-label="Close">&times;</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-weight:1000">Handwritten answer</div>
+          <a id="handwrittenDownload" class="btn btn-solid" href="#" download="handwritten.jpg" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;font-size:13px">Download</a>
+        </div>
+        <img id="handwrittenModalImg" src="" alt="Handwritten answer" class="modal-image">
+      </div>
+    </div>
+
   <div id="reportOverlay" class="report-overlay hidden" aria-hidden="true">
     <div class="results-shell">
       <div class="results-top">
@@ -157,24 +170,6 @@
       navigator.serviceWorker.register('service-worker.js').catch(function () {});
     }
   </script>
-
-
-<!-- Handwritten Modal -->
-<div id="handwrittenModal" aria-hidden="true">
-  <div id="handwrittenBackdrop" class="handwritten-backdrop"></div>
-  <div class="handwritten-sheet" role="dialog" aria-modal="true" aria-label="Handwritten answer">
-    <div class="handwritten-top">
-      <h3>Handwritten answer</h3>
-      <button id="handwrittenClose" class="handwritten-close" type="button">×</button>
-    </div>
-    <div class="handwritten-body">
-      <img id="handwrittenModalImg" alt="Handwritten answer preview" />
-    </div>
-    <div class="handwritten-bottom">
-      <a id="handwrittenDownload" class="handwritten-download" href="#" target="_blank" rel="noopener">Download</a>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

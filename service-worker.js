@@ -1,4 +1,4 @@
-const CACHE_NAME = 'examorio-cache-v5';
+const CACHE_NAME = 'examorio-cache-v2';
 const ASSETS = [
   './',
   './index.html',

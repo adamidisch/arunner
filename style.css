@@ -638,28 +638,16 @@ body.no-scroll{overflow:hidden;}
 }
 
 
-.handwritten-actions{width:100%;display:flex;justify-content:center;margin-top:10px;}
-
-/* Handwritten button (QR) smaller + centered */
-.upload-hand-btn{width:auto;min-width:200px;max-width:260px;margin:10px auto 0;display:block;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:900;}
-
-/* Small view button */
-.handwritten-view-btn{border:2px solid #22c55e;border-radius:999px;background:rgba(34,197,94,.12);color:#eaf2ff;padding:8px 14px;cursor:pointer;font-weight:900;font-size:13px;width:auto;margin:0;display:inline-flex;align-items:center;gap:8px;}
-
-
-#handwrittenModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;}
-#handwrittenModal.show{display:flex;}
-.handwritten-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);}
-.handwritten-sheet{position:relative;max-width:92vw;max-height:92vh;width:920px;background:#0b1220;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45);display:flex;flex-direction:column;}
-.handwritten-top{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);}
-.handwritten-top h3{margin:0;font-size:14px;}
-.handwritten-close{background:transparent;border:0;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:6px 10px;}
-.handwritten-body{flex:1;overflow:auto;background:#050a12;display:flex;align-items:center;justify-content:center;}
-.handwritten-body img{max-width:100%;height:auto;display:block;}
-.handwritten-bottom{display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:10px 12px;border-top:1px solid rgba(255,255,255,.08);}
-.handwritten-download{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;font-size:12px;border-radius:999px;border:2px solid #f5c84b;background:#f5c84b;color:#0b1220;font-weight:900;text-decoration:none;}
-
-@media (max-width: 700px){
-  .handwritten-sheet{width:100%;height:100%;max-width:100vw;max-height:100vh;border-radius:0;}
-  .handwritten-bottom{position:sticky;bottom:0;left:0;right:0;justify-content:center;}
+/* Handwritten view button (opens modal + download) */
+.handwritten-view-btn{
+  border:2px solid #60a5fa;
+  border-radius:999px;
+  background: rgba(0,0,0,0.12);
+  color:#eaf2ff;
+  padding:8px 14px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:13px;
+  width:100%;
+  margin-top:10px;
 }

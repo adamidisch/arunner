@@ -580,7 +580,7 @@ function exportAttemptToPdf(attempt){
       .bad{color:#fb7185}
       .q-block{margin-top:14px;border:1px solid rgba(96,165,250,.35);border-radius:14px;padding:12px;background:rgba(2,10,24,.25);page-break-inside:avoid}
       .q-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
-      .q-num{font-weight:900;color:#f5c84b}
+      .q-num{font-weight:900;color:#c7d2fe}
       .q-topic{color:#c7d2fe;font-size:12px;text-align:right}
       .q-text{margin-top:6px;font-size:14px;font-weight:700}
       .chosen{margin-top:8px;font-size:13px;color:#eaf2ff}
@@ -1041,19 +1041,63 @@ async function loadQuestions() {
 }
 
 
-if (reportRestartBtn) {
-  reportRestartBtn.addEventListener('click', () => {
-    // back to login
-    if (reportOverlay) {
-      reportOverlay.classList.remove('show');
-      reportOverlay.classList.add('hidden');
+
+function resetQuizKeepStudent(){
+  // close any open modals
+  closeGraphModal();
+  closeExtractModal();
+  closeQrModal();
+  closeHandwrittenModal();
+
+  // clear saved answers for this attempt only (keep student)
+  try{
+    (questions || []).forEach(q => {
+      const id = q && q.id ? q.id : '';
+      if (!id) return;
+      localStorage.removeItem(studentKeyPrefix() + 'ans_' + id);
+    });
+  }catch(_){}
+
+  // reset state
+  currentIndex = 0;
+  hasAnsweredCurrent = false;
+  lastAttemptSnapshot = null;
+
+  // reset timer
+  if (timerIntervalId) {
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  timerSeconds = 60 * 60;
+  timerStarted = false;
+  if (timerEl) timerEl.textContent = formatTime(timerSeconds);
+
+  // hide report overlay
+  if (reportOverlay) {
+    reportOverlay.classList.remove('show');
+    reportOverlay.classList.add('hidden');
+    reportOverlay.setAttribute('aria-hidden', 'true');
+  }
   document.body.classList.remove('no-scroll');
-      reportOverlay.setAttribute('aria-hidden', 'true');
-    }
-    loginOverlay.classList.remove('hidden');
-  });
+
+  // ensure quiz UI visible
+  if (loginOverlay) loginOverlay.classList.add('hidden');
+  if (cardEl) {
+    cardEl.classList.remove('hidden');
+    cardEl.classList.remove('show');
+  }
+
+  // render from start
+  renderQuestion();
+  revealQuestionCard();
+  startTimer();
 }
 
+if (reportRestartBtn) {
+  reportRestartBtn.addEventListener('click', () => {
+    resetQuizKeepStudent();
+  });
+}
 if (reportExportPdfBtn) {
   reportExportPdfBtn.addEventListener('click', () => {
     exportAttemptToPdf(lastAttemptSnapshot || null);
@@ -1096,7 +1140,7 @@ function buildReport() {
 
   const wrong = Math.max(0, answered - correct);
   const skipped = Math.max(0, total - answered);
-  const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   const elapsed = (60 * 60) - timerSeconds;
   const timeText = formatTimeMMSS(elapsed);
